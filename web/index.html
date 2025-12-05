@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View Camera Live</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #222;
+    }
+    video {
+      width: 90%;
+      max-width: 800px;
+      border: 2px solid #fff;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<video id="video" controls autoplay muted></video>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.0/dist/hls.min.js"></script>
+<script>
+  const video = document.getElementById('video');
+  const hlsUrl = 'http://<HOST_SYSTEM_IP>:8888/home_front/index.m3u8';
+
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(hlsUrl);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      video.play();
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    // Safari / iOS
+    video.src = hlsUrl;
+    video.addEventListener('loadedmetadata', () => {
+      video.play();
+    });
+  } else {
+    alert('Your browser does not support HLS playback.');
+  }
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,47 @@
+api: yes
+apiAddress: :9997
+
+rtspAddress: :8554
+
+# Enable HLS for browsers & mobile
+hlsAddress: :8888
+hlsAlwaysRemux: yes
+
+# Enable WebRTC for low-latency streaming
+webrtc: yes
+webrtcAddress: :8889
+webrtcEncryption: no
+#webrtcICEServers:
+#  - urls:
+#      - stun:stun.l.google.com:19302
+
+# Global recording config
+pathDefaults:
+  record: yes
+  recordFormat: fmp4
+  recordPath: /recordings/%path/%Y%m%d_%H%M%S
+  recordSegmentDuration: 15m
+  recordDeleteAfter: 168h  # Keep only 7 days
+  runOnRecordSegmentComplete: |
+    filepath="$MTX_SEGMENT_PATH"
+    # Extract original filename without extension
+    file=$(basename "$filepath" .mp4)
+    # Get current UTC timestamp from filename (adjust if your filename differs)
+    ts="$file"
+    # Convert to IST (+5:30)
+    new_ts=$(date -d "$ts UTC +5 hours 30 minutes" +"%H%M%S")
+    # Create folder per IST date
+    new_dir=$(date -d "$ts UTC +5 hours 30 minutes" +"%Y%m%d")
+    mkdir -p "/recordings/$MTX_PATH/$new_dir"
+    # Move and rename segment into date-wise folder
+    mv "$filepath" "/recordings/$MTX_PATH/$new_dir/${new_ts}.mp4"
+
+paths:
+  home_front:
+    source: rtsp://<user>:<pass>@<CAM_IP_ADDRESS>/stream
+    sourceOnDemand: no
+
+#  House_parking:
+#    source: rtsp://user:[email protected]/out.h264
+#    sourceOnDemand: no
+
